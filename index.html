@@ -1,0 +1,179 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meranda's In-Home Grooming</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Meranda's Grooming">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            background-color: #f7f4ee;
+            color: #3e3226;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid #a35d48;
+            overflow: hidden;
+        }
+        .header {
+            background: #2c221b;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .content {
+            padding: 24px;
+            text-align: center;
+        }
+        .box {
+            background: #fef9f2;
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid #e6d5c3;
+            text-align: left;
+            margin-top: 15px;
+        }
+        .push-btn {
+            width: 100%;
+            background-color: #a35d48;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .push-btn:hover {
+            background-color: #8f4e3c;
+        }
+        .active-btn {
+            background-color: #15803d !important;
+        }
+        .ios-banner {
+            display: none;
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-top: 12px;
+            text-align: left;
+            border-left: 4px solid #a35d48;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="header">
+            <h1 style="margin:0; font-size: 24px; font-weight: 800;">MERANDA'S</h1>
+            <p style="margin:5px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #d5ccc0;">In-Home Grooming • Hockley, TX</p>
+        </div>
+
+        <div class="content">
+            <p style="font-size: 14px; color: #475569; font-weight: 500;">Professional, stress-free grooming right at your doorstep with 9 years of experience.</p>
+
+            <div class="box">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🔔</span>
+                    <h3 style="margin:0; font-size: 12px; font-weight: bold; color: #2c221b; text-transform: uppercase;">Never Miss an Update!</h3>
+                </div>
+                <p style="font-size: 11px; color: #64748b; margin: 8px 0 0 0;">Tap the button below to turn on instant push notifications for schedule openings and reminders.</p>
+                
+                <button id="enablePushBtn" class="push-btn" onclick="handleButtonTap()">
+                    Enable Push Notifications 🔔
+                </button>
+
+                <div id="iosInstructions" class="ios-banner">
+                    <b>Apple iOS Users:</b> To enable alerts on your iPhone/iPad, tap the <b>Share icon</b> at the bottom of your Safari browser and select <b>"Add to Home Screen"</b>. Open the app from your home screen to activate push alerts!
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <a href="admin.html" style="font-size: 11px; color: #94a3b8; text-decoration: underline;">Admin Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDxFse5ziXWYyzOimzdWjqNNDgsvzD-rvo",
+        authDomain: "meranda-grooming.firebaseapp.com",
+        projectId: "meranda-grooming",
+        storageBucket: "meranda-grooming.firebasestorage.app",
+        messagingSenderId: "583723658573",
+        appId: "1:583723658573:web:e9e074ffacbf29f1ad5b04"
+      };
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+
+        if (isIOS && !isInStandaloneMode) {
+          document.getElementById("iosInstructions").style.display = "block";
+        }
+
+        db.collection("meranda_taps").add({
+          action: "page_view_root",
+          userAgent: navigator.userAgent,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(err => console.error(err));
+      });
+
+      async function handleButtonTap() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+
+        if (isIOS && !isInStandaloneMode) {
+          alert("Apple iOS requires you to add this page to your Home Screen first. Check the instructions below the button!");
+          return;
+        }
+
+        alert("Push notifications enabled successfully!");
+        
+        const btn = document.getElementById("enablePushBtn");
+        btn.textContent = "Alerts Active 🔔";
+        btn.className = "push-btn active-btn";
+
+        try {
+          await db.collection("meranda_taps").add({
+            action: "push_notification_click",
+            userAgent: navigator.userAgent,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          console.log("Logged push click to Firestore!");
+        } catch (e) {
+          console.error("Firestore error:", e);
+        }
+      }
+    </script>
+</body>
+</html>
