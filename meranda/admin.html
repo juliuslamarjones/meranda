@@ -21,7 +21,6 @@
 
         <!-- Broadcast Form -->
         <div class="space-y-4">
-            <!-- Hidden API Key field updated with your new key -->
             <input type="hidden" id="apiKeyInput" value="os_v2_app_ed76yxkh5rd2fecpnljtiukpiqtzz7r5wunu6mf5lbhgm3kdjylrc53va4fooaazssat2u2bmeceagfar4l7mkmmtbgk2ktxdwqtp7a">
 
             <div>
@@ -68,7 +67,11 @@
           statusMsg.textContent = "Sending broadcast...";
 
           try {
-              const response = await fetch("https://onesignal.com/api/v1/notifications", {
+              // Using a reliable CORS proxy wrapper for client-side API requests
+              const proxyUrl = "https://corsproxy.io/?";
+              const targetUrl = "https://onesignal.com/api/v1/notifications";
+
+              const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
                   method: "POST",
                   headers: {
                       "Content-Type": "application/json; charset=utf-8",
