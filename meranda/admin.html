@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meranda's Grooming - Admin Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-[500px] bg-[#fef9f2] rounded-3xl shadow-xl border-[3px] border-[#a35d48] p-6 space-y-6">
+        
+        <div class="text-center space-y-1">
+            <h1 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center 🔒</h1>
+            <p class="text-xs text-slate-600">Send push announcements directly to all customer devices via OneSignal API.</p>
+        </div>
+
+        <!-- Broadcast Form -->
+        <div class="space-y-4">
+            <!-- Hidden API Key field so you never have to type it or see it -->
+            <input type="hidden" id="apiKeyInput" value="os_v2_app_ed76yxkh5rd2fecpnljtiukpitj6scdayiaua7v55r72py2ljfqy4lpiflxqfud3vs5r7fngiojvahh6ynlzldwjfpcu5gtoco6locy">
+
+            <div>
+                <label class="block text-xs font-bold text-[#2c221b] mb-1">Notification Title</label>
+                <input type="text" id="notifTitle" placeholder="e.g. Schedule Opening Tomorrow!" 
+                    class="w-full text-xs p-3 rounded-xl border border-[#e6d5c3] bg-white text-slate-700 focus:outline-none focus:border-[#a35d48]">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-[#2c221b] mb-1">Message Body</label>
+                <textarea id="notifMessage" rows="3" placeholder="e.g. We have an opening at 2 PM in Hockley, TX. Tap to book!" 
+                    class="w-full text-xs p-3 rounded-xl border border-[#e6d5c3] bg-white text-slate-700 focus:outline-none focus:border-[#a35d48]"></textarea>
+            </div>
+
+            <button onclick="sendBroadcast()" id="broadcastBtn" 
+                class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold text-xs uppercase tracking-wider py-4 rounded-xl shadow-md transition">
+                Broadcast Message 🚀
+            </button>
+
+            <div id="statusMsg" class="text-center text-xs font-semibold pt-1"></div>
+        </div>
+
+        <div class="text-center pt-2 border-t border-[#e6d5c3]">
+            <a href="index.html" class="text-xs text-[#a35d48] font-bold underline">← Back to App</a>
+        </div>
+    </div>
+
+    <script>
+      const APP_ID = "20ffec5d-47ec-47a2-904f-6ad334514f44";
+
+      async function sendBroadcast() {
+          const apiKey = document.getElementById("apiKeyInput").value.trim();
+          const title = document.getElementById("notifTitle").value.trim();
+          const message = document.getElementById("notifMessage").value.trim();
+          const statusMsg = document.getElementById("statusMsg");
+
+          if (!title || !message) {
+              statusMsg.style.color = "red";
+              statusMsg.textContent = "Please fill in the title and message.";
+              return;
+          }
+
+          statusMsg.style.color = "#64748b";
+          statusMsg.textContent = "Sending broadcast...";
+
+          try {
+              const response = await fetch("https://onesignal.com/api/v1/notifications", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json; charset=utf-8",
+                      "Authorization": "Basic " + apiKey
+                  },
+                  body: JSON.stringify({
+                      app_id: APP_ID,
+                      included_segments: ["Total Subscriptions"],
+                      headings: { en: title },
+                      contents: { en: message }
+                  })
+              });
+
+              const data = await response.json();
+              if (response.ok) {
+                  statusMsg.style.color = "#15803d";
+                  statusMsg.textContent = "Success! Broadcast sent to all subscribers.";
+              } else {
+                  statusMsg.style.color = "red";
+                  statusMsg.textContent = "Error: " + (data.errors ? data.errors[0] : JSON.stringify(data));
+              }
+          } catch (err) {
+              statusMsg.style.color = "red";
+              statusMsg.textContent = "Network error: " + err.message;
+          }
+      }
+    </script>
+</body>
+</html>
