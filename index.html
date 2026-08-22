@@ -3,45 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meranda's Grooming</title>
+    <title>Meranda's In-Home Grooming</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- OneSignal SDK -->
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- OneSignal SDK v16 -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
-      window.OneSignalDeferred.push(async function(OneSignal) {
+      OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "20ffec5d-47ec-47a2-904f-6ad334514f44",
-          safari_web_id: "web.onesignal.auto.00000000-0000-0000-0000-000000000000",
-          notifyButton: {
-            enable: true,
-          },
         });
       });
     </script>
+
+    <style>
+        .push-btn {
+            width: 100%;
+            background-color: #a35d48;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: background-color 0.2s ease;
+        }
+        .push-btn:hover {
+            background-color: #8f4e3c;
+        }
+        .active-btn {
+            background-color: #15803d !important;
+        }
+    </style>
 </head>
-<body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center justify-center min-h-screen p-4">
+<body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center p-4 min-h-screen">
 
-    <div class="w-full max-w-[500px] bg-[#fef9f2] rounded-3xl shadow-xl border-[3px] border-[#a35d48] p-6 space-y-6 text-center">
-        <h1 class="text-2xl font-bold text-[#2c221b]">Meranda's Grooming 🐾</h1>
-        <p class="text-sm text-slate-600">Pampering Your Furry Friends!</p>
-
-        <div class="bg-white p-4 rounded-2xl border border-[#e6d5c3] space-y-3">
-            <h2 class="font-bold text-sm text-[#2c221b]">Never Miss an Update!</h2>
-            <p class="text-xs text-slate-500">Tap below to turn on instant push notifications for schedule openings.</p>
-            <button onclick="OneSignal.Slidedown.promptPush()" class="w-full bg-[#a35d48] text-white font-bold text-xs py-3 rounded-xl uppercase tracking-wider">
-                Enable Push Notifications 🔔
-            </button>
+    <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] overflow-hidden my-auto relative pb-6">
+        
+        <!-- Header Image (The Dogs) -->
+        <div class="w-full relative">
+            <img src="flyer.jpg" alt="Meranda's Grooming Flyer" class="w-full object-cover">
         </div>
 
-        <!-- Prominent Admin Portal Button -->
-        <div class="pt-2">
-            <a href="admin.html" class="block w-full bg-[#2c221b] text-white font-bold text-xs py-3 rounded-xl uppercase tracking-wider hover:bg-[#43352b] transition">
-                Open Admin Portal 🔒
-            </a>
+        <div class="px-6 text-center space-y-5 -mt-2">
+            
+            <div class="space-y-1">
+                <h2 class="text-xl font-bold text-[#2c221b]">Pampering Your Furry Friends!</h2>
+                <p class="text-xs text-slate-600 font-medium">Book your appointments and stay updated on exclusive grooming tips, special availability, and updates.</p>
+            </div>
+
+            <!-- Push Notification Box -->
+            <div class="bg-white p-5 rounded-2xl border border-[#e6d5c3] shadow-sm text-left space-y-3 relative z-10">
+                <div class="flex items-center gap-2 justify-center">
+                    <span class="text-lg">🔔</span>
+                    <h3 class="text-xs font-bold text-[#2c221b] uppercase tracking-wider">Never Miss an Update!</h3>
+                </div>
+                <p class="text-[11px] text-slate-500 text-center leading-relaxed">Tap the button below to turn on instant push notifications for schedule openings and reminders.</p>
+                
+                <!-- Direct clickable button -->
+                <button id="enablePushBtn" class="push-btn" onclick="handleButtonTap()">
+                    Enable Push Notifications 🔔
+                </button>
+                
+                <div class="text-center pt-2">
+                    <a href="admin.html" class="text-[10px] text-slate-400 hover:text-[#a35d48] underline flex items-center justify-center gap-1">
+                        <span>🔒</span> Admin Portal
+                    </a>
+                </div>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="bg-white p-5 rounded-2xl border border-dashed border-[#d5ccc0] space-y-3 relative z-10 mt-4">
+                <div class="flex items-center justify-center gap-2">
+                    <span class="text-sm">📱</span>
+                    <h3 class="text-xs font-bold text-[#2c221b] uppercase tracking-wider">Scan to view on mobile</h3>
+                </div>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://juliuslamarjones.github.io/meranda/" alt="QR Code" class="w-32 h-32 mx-auto rounded-md">
+            </div>
+
+            <!-- Client Instructions -->
+            <div class="text-left bg-[#f3efe8] p-4 rounded-xl border border-[#e6d5c3]">
+                <h4 class="text-xs font-bold text-[#2c221b] mb-2 flex items-center gap-1"><span>📋</span> Client Instructions:</h4>
+                <ol class="text-[10px] text-slate-600 space-y-1 pl-4 list-decimal marker:font-bold">
+                    <li>Open your phone's camera and scan the QR code above.</li>
+                    <li>Tap the link to open Meranda's Grooming page.</li>
+                    <li>Tap <strong>"Enable Push Notifications"</strong> when prompted to stay connected!</li>
+                </ol>
+            </div>
+
         </div>
     </div>
 
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDxFse5ziXWYyzOimzdWjqNNDgsvzD-rvo",
+        authDomain: "meranda-grooming.firebaseapp.com",
+        projectId: "meranda-grooming",
+        storageBucket: "meranda-grooming.firebasestorage.app",
+        messagingSenderId: "583723658573",
+        appId: "1:583723658573:web:e9e074ffacbf29f1ad5b04"
+      };
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
+
+      db.collection("meranda_taps").add({
+        action: "page_view_onesignal",
+        userAgent: navigator.userAgent,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(err => console.error(err));
+
+      async function handleButtonTap() {
+        const btn = document.getElementById("enablePushBtn");
+        btn.textContent = "Alerts Active 🔔";
+        btn.className = "push-btn active-btn";
+
+        try {
+          if (window.OneSignal && window.OneSignal.Notifications) {
+            await window.OneSignal.Notifications.requestPermission();
+          } else {
+            console.warn("OneSignal not loaded yet");
+          }
+
+          await db.collection("meranda_taps").add({
+            action: "push_notification_click",
+            userAgent: navigator.userAgent,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          console.log("Successfully logged push subscription click!");
+        } catch (e) {
+          console.error("Push / Firestore error:", e);
+        }
+      }
+    </script>
 </body>
 </html>
