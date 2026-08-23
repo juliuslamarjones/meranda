@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meranda's Grooming</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "3679c656-78e5-47fc-b586-cfc6c4989679",
+          safari_web_id: "web.onesignal.auto.00000000-0000-0000-0000-000000000000",
+          notifyButton: {
+            enable: true,
+          },
+        });
+      });
+    </script>
 </head>
 <body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center p-4 min-h-screen">
     <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] overflow-hidden my-auto p-6 space-y-6 text-center">
@@ -17,52 +28,5 @@
             <a href="admin.html" class="text-xs text-slate-400 hover:text-[#a35d48] underline">Go to Admin Broadcast Center</a>
         </div>
     </div>
-
-    <!-- Live Popup Modal -->
-    <div id="popupModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center border-2 border-[#a35d48]">
-            <h3 id="popupTitle" class="text-xl font-bold text-[#2c221b]"></h3>
-            <p id="popupBody" class="text-sm text-slate-600"></p>
-            <button onclick="closePopup()" class="w-full bg-[#a35d48] text-white font-bold py-3 rounded-xl">Got It</button>
-        </div>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxFse5ziXWYyzOimzdWjqNNDgsvzD-rvo",
-            authDomain: "meranda-grooming.firebaseapp.com",
-            projectId: "meranda-grooming",
-            storageBucket: "meranda-grooming.firebasestorage.app",
-            messagingSenderId: "583723658573",
-            appId: "1:583723658573:web:e9e074ffacbf29f1ad5b04"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.firestore();
-
-        // Realtime Firestore listener for instant popups
-        db.collection("broadcasts").orderBy("timestamp", "desc").limit(1)
-            .onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        const data = change.doc.data();
-                        showPopup(data.title, data.message);
-                    }
-                });
-            });
-
-        function showPopup(title, body) {
-            document.getElementById("popupTitle").textContent = title;
-            document.getElementById("popupBody").textContent = body;
-            document.getElementById("popupModal").classList.remove("hidden");
-            try {
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                audio.play();
-            } catch(e) {}
-        }
-
-        function closePopup() {
-            document.getElementById("popupModal").classList.add("hidden");
-        }
-    </script>
 </body>
 </html>
