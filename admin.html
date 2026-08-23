@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meranda's Grooming - Admin Broadcast Center</title>
+    <title>Meranda's Grooming - Admin Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -12,7 +12,7 @@
     <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] p-6 text-center space-y-6">
         <div class="space-y-1">
             <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center</h2>
-            <p class="text-xs text-slate-600">Send instant announcements & screen popups.</p>
+            <p class="text-xs text-slate-600">Send announcements with instant popup.</p>
         </div>
         <div class="space-y-4 text-left">
             <div>
@@ -24,7 +24,7 @@
                 <textarea id="notifBody" rows="3" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Unexpected cancellation at 2 PM..."></textarea>
             </div>
             <button onclick="sendBroadcast()" class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold py-4 px-6 rounded-xl shadow-md transition text-sm cursor-pointer">
-                BROADCAST & POPUP NOW
+                SEND INSTANT POPUP NOW
             </button>
         </div>
         <div id="statusMessage" class="text-xs font-medium hidden"></div>
@@ -44,7 +44,6 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
-        // Request notification permission on load so popups are allowed
         if (window.Notification && Notification.permission !== "granted") {
             Notification.requestPermission();
         }
@@ -61,41 +60,35 @@
                 return;
             }
 
-            statusEl.textContent = "Publishing broadcast & triggering popup...";
+            statusEl.textContent = "Triggering popup...";
             statusEl.className = "text-xs font-medium text-slate-600";
             statusEl.classList.remove("hidden");
 
             try {
-                // 1. Clear old broadcasts
                 const snapshot = await db.collection("broadcasts").get();
                 const batch = db.batch();
                 snapshot.docs.forEach((doc) => batch.delete(doc.ref));
                 await batch.commit();
 
-                // 2. Add new broadcast
                 await db.collection("broadcasts").add({
                     title: title,
                     message: message,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 3. Trigger immediate native browser popup on this screen
                 if (window.Notification && Notification.permission === "granted") {
-                    new Notification(title, {
-                        body: message,
-                        icon: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://juliuslamarjones.github.io/meranda/'
-                    });
+                    new Notification(title, { body: message });
                 } else {
                     alert(title + ": " + message);
                 }
 
-                statusEl.textContent = "Success! Broadcast saved & popup triggered.";
+                statusEl.textContent = "Success! Popup triggered & broadcast sent.";
                 statusEl.className = "text-xs font-bold text-green-700";
                 document.getElementById("notifTitle").value = "";
                 document.getElementById("notifBody").value = "";
             } catch (err) {
                 console.error(err);
-                statusEl.textContent = "Error sending broadcast.";
+                statusEl.textContent = "Error sending.";
                 statusEl.className = "text-xs font-bold text-red-600";
             }
         }
