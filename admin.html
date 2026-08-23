@@ -11,10 +11,19 @@
     <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] p-6 text-center space-y-6">
         <div class="space-y-1">
             <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center ??</h2>
-            <p class="text-xs text-slate-600">Send push announcements directly to all customer devices via OneSignal API.</p>
+            <p class="text-xs text-slate-600">Send push announcements directly to all customer devices.</p>
         </div>
 
-        <div class="space-y-4 text-left">
+        <!-- Quick OneSignal Dashboard Shortcut (Bypasses Browser CORS instantly) -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-left space-y-2">
+            <p class="text-xs font-bold text-amber-900">?? Quickest Way to Broadcast:</p>
+            <p class="text-[11px] text-amber-800">Because browsers block direct API calls to external servers (CORS), use the official OneSignal dashboard to send messages instantly:</p>
+            <a href="https://app.onesignal.com/" target="_blank" class="block text-center bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow">
+                Open OneSignal Dashboard ?
+            </a>
+        </div>
+
+        <div class="space-y-4 text-left border-t border-slate-200 pt-4">
             <div>
                 <label class="block text-xs font-bold text-[#2c221b] mb-1">Notification Title</label>
                 <input type="text" id="notifTitle" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Special Opening Tomorrow!">
@@ -25,8 +34,8 @@
                 <textarea id="notifBody" rows="3" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. We have an unexpected cancellation at 2 PM..."></textarea>
             </div>
 
-            <button onclick="sendBroadcast()" class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold py-4 px-6 rounded-xl shadow-md transition text-sm cursor-pointer">
-                BROADCAST MESSAGE ??
+            <button onclick="copyPayload()" class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold py-3 px-6 rounded-xl shadow-md transition text-xs cursor-pointer">
+                ?? Copy Notification Text for Broadcast
             </button>
         </div>
 
@@ -38,63 +47,28 @@
     </div>
 
     <script>
-        async function sendBroadcast() {
+        function copyPayload() {
             const title = document.getElementById("notifTitle").value.trim();
             const message = document.getElementById("notifBody").value.trim();
             const statusEl = document.getElementById("statusMessage");
 
             if (!title || !message) {
-                statusEl.textContent = "Please fill out both the title and message body.";
+                statusEl.textContent = "Please fill out both the title and message body first.";
                 statusEl.className = "text-xs font-medium text-red-600";
                 statusEl.classList.remove("hidden");
                 return;
             }
 
-            statusEl.textContent = "Sending broadcast...";
-            statusEl.className = "text-xs font-medium text-slate-600";
-            statusEl.classList.remove("hidden");
-
-            try {
-                // Using allorigins proxy which preserves request headers properly
-                const targetUrl = "https://api.onesignal.com/notifications";
-                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(targetUrl);
-
-                // Note: allorigins passes through, but let's check standard OneSignal fetch
-                const response = await fetch("https://api.onesignal.com/notifications", {
-                    method: "POST",
-                    mode: "cors",
-                    headers: {
-                        "Content-Type": "application/json; charset=utf-8",
-                        "Authorization": "Key os_v2_app_ed76yxkh5rd2fecpnljtiukpir3r5ct37hzuvs56bjkluf72fpbl5e2zpph5ljbwflagr46updk7aw5p3auporijbytrjw7iwc72uda"
-                    },
-                    body: JSON.stringify({
-                        app_id: "20ffec5d-47ec-47a2-904f-6ad334514f44",
-                        included_segments: ["All"],
-                        headings: { "en": title },
-                        contents: { "en": message }
-                    })
-                });
-
-                let data = {};
-                try {
-                    data = await response.json();
-                } catch(e) {}
-
-                if (response.ok) {
-                    statusEl.textContent = "Success! Broadcast sent to all users ??";
-                    statusEl.className = "text-xs font-bold text-green-700";
-                    document.getElementById("notifTitle").value = "";
-                    document.getElementById("notifBody").value = "";
-                } else {
-                    console.error("OneSignal Error:", data);
-                    statusEl.textContent = "Error (" + response.status + "): " + (data.errors ? JSON.stringify(data.errors) : "Check API key permissions.");
-                    statusEl.className = "text-xs font-medium text-red-600";
-                }
-            } catch (err) {
-                console.error("Network/CORS error:", err);
-                statusEl.textContent = "CORS restriction blocked direct browser call. Use OneSignal Dashboard or server backend.";
-                statusEl.className = "text-xs font-medium text-orange-600";
-            }
+            const textToCopy = `Title: ${title}\nMessage: ${message}`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                statusEl.textContent = "Copied to clipboard! Paste it into your OneSignal Dashboard message box ??";
+                statusEl.className = "text-xs font-bold text-green-700";
+                statusEl.classList.remove("hidden");
+            }).catch(err => {
+                statusEl.textContent = "Failed to copy text.";
+                statusEl.className = "text-xs font-medium text-red-600";
+                statusEl.classList.remove("hidden");
+            });
         }
     </script>
 </body>
