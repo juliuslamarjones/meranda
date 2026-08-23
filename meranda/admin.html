@@ -46,7 +46,10 @@
             messagingSenderId: "583723658573",
             appId: "1:583723658573:web:e9e074ffacbf29f1ad5b04"
         };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        
+        if (!firebase.apps.length) { 
+            firebase.initializeApp(firebaseConfig); 
+        }
         const db = firebase.firestore();
 
         async function sendBroadcast() {
@@ -64,14 +67,13 @@
             status.textContent = "Sending broadcast...";
 
             try {
-                // Save to Firestore broadcasts collection
+                // Ensure Firestore writes without relying on local cache locks
                 await db.collection("broadcasts").add({
                     title: title,
                     message: message,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Also trigger local notification on the admin device if permitted
                 if (window.Notification && Notification.permission === "granted") {
                     new Notification(title, { body: message });
                 }
@@ -81,9 +83,9 @@
                 document.getElementById("notifTitle").value = "";
                 document.getElementById("notifMessage").value = "";
             } catch (error) {
-                console.error("Broadcast error:", error);
+                console.error("Broadcast error details:", error);
                 status.style.color = "red";
-                status.textContent = "Error: " + error.message;
+                status.textContent = "Error: " + (error.message || error.code || "Unknown error");
             }
         }
     </script>
