@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meranda's Grooming - Admin Broadcast Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase App & Firestore SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] p-6 text-center space-y-6">
         <div class="space-y-1">
             <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center ??</h2>
-            <p class="text-xs text-slate-600">Send push announcements directly to all customer devices.</p>
+            <p class="text-xs text-slate-600">Send instant announcements directly to your app users.</p>
         </div>
 
         <div class="space-y-4 text-left">
@@ -38,7 +41,22 @@
     </div>
 
     <script>
-        function sendBroadcast() {
+        // Initialize Firebase (using your standard configuration)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyForQuickTapSolution",
+            authDomain: "quicktap-solutions.firebaseapp.com",
+            projectId: "quicktap-solutions",
+            storageBucket: "quicktap-solutions.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        async function sendBroadcast() {
             const title = document.getElementById("notifTitle").value.trim();
             const message = document.getElementById("notifBody").value.trim();
             const statusEl = document.getElementById("statusMessage");
@@ -50,14 +68,26 @@
                 return;
             }
 
-            statusEl.textContent = "Redirecting to secure OneSignal dispatch portal...";
-            statusEl.className = "text-xs font-bold text-green-700";
+            statusEl.textContent = "Publishing broadcast to database...";
+            statusEl.className = "text-xs font-medium text-slate-600";
             statusEl.classList.remove("hidden");
 
-            // Open OneSignal dashboard messaging page directly
-            setTimeout(() => {
-                window.open("https://dashboard.onesignal.com/apps/20ffec5d-47ec-47a2-904f-6ad334514f44/messages/new", "_blank");
-            }, 500);
+            try {
+                await db.collection("broadcasts").add({
+                    title: title,
+                    message: message,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                statusEl.textContent = "Success! Broadcast sent to all active users ??";
+                statusEl.className = "text-xs font-bold text-green-700";
+                document.getElementById("notifTitle").value = "";
+                document.getElementById("notifBody").value = "";
+            } catch (err) {
+                console.error("Broadcast error:", err);
+                statusEl.textContent = "Error publishing broadcast. Check connection.";
+                statusEl.className = "text-xs font-bold text-red-600";
+            }
         }
     </script>
 </body>
