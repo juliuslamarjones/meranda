@@ -69,20 +69,38 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
-        // Fetch latest broadcast immediately on load
-        db.collection("broadcasts").orderBy("timestamp", "desc").limit(1).get().then((snapshot) => {
-            if (!snapshot.empty) {
-                const data = snapshot.docs[0].data();
-                document.getElementById("bannerTitle").textContent = data.title;
-                document.getElementById("bannerMessage").textContent = data.message;
-                document.getElementById("broadcastBanner").classList.remove("hidden");
-            }
+        // Real-time listener: updates banner AND triggers native popup automatically for customers
+        let initialLoad = true;
+        db.collection("broadcasts").orderBy("timestamp", "desc").limit(1).onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const data = change.doc.data();
+                    document.getElementById("bannerTitle").textContent = data.title;
+                    document.getElementById("bannerMessage").textContent = data.message;
+                    document.getElementById("broadcastBanner").classList.remove("hidden");
+
+                    if (!initialLoad && window.Notification && Notification.permission === "granted") {
+                        new Notification(data.title, { body: data.message });
+                    }
+                }
+            });
+            initialLoad = false;
         });
 
         async function logClick() {
             const btn = document.getElementById("enablePushBtn");
-            btn.textContent = "Alerts Active";
-            btn.className = "push-btn active-btn";
+            
+            if (window.Notification) {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    btn.textContent = "Alerts Active ✓";
+                    btn.className = "push-btn active-btn";
+                    new Notification("Meranda's In-Home Grooming", { body: "You will now receive instant popups for schedule openings!" });
+                } else {
+                    btn.textContent = "Notifications Blocked";
+                }
+            }
+
             try {
                 await db.collection("meranda_taps").add({
                     action: "push_notification_click",
