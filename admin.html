@@ -58,11 +58,12 @@
                 const targetUrl = "https://api.onesignal.com/notifications";
                 const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
+                // Make sure to generate and use your actual App API Key from OneSignal (Settings > Keys & IDs)
                 const response = await fetch(proxyUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
-                        "Authorization": "Key os_v2_app_ed76yxkh5rd2fecpnljtiukpir3r5ct37hzuvs56bjkluf72fpbl5e2zpph5ljbwflagr46updk7aw5p3auporijbytrjw7iwc72uda"
+                        "Authorization": "Key YOUR_REAL_APP_API_KEY_HERE"
                     },
                     body: JSON.stringify({
                         app_id: "20ffec5d-47ec-47a2-904f-6ad334514f44",
