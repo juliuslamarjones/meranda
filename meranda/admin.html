@@ -1,45 +1,37 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meranda's Grooming - Admin Broadcast Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase App & Firestore SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center justify-center min-h-screen p-4">
-
     <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] p-6 text-center space-y-6">
         <div class="space-y-1">
-            <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center ??</h2>
-            <p class="text-xs text-slate-600">Send instant announcements directly to your app users.</p>
+            <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center 🚀</h2>
+            <p class="text-xs text-slate-600">Send instant announcements to app users.</p>
         </div>
-
         <div class="space-y-4 text-left">
             <div>
                 <label class="block text-xs font-bold text-[#2c221b] mb-1">Notification Title</label>
                 <input type="text" id="notifTitle" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Special Opening Tomorrow!">
             </div>
-
             <div>
                 <label class="block text-xs font-bold text-[#2c221b] mb-1">Message Body</label>
-                <textarea id="notifBody" rows="3" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. We have an unexpected cancellation at 2 PM..."></textarea>
+                <textarea id="notifBody" rows="3" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Unexpected cancellation at 2 PM..."></textarea>
             </div>
-
             <button onclick="sendBroadcast()" class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold py-4 px-6 rounded-xl shadow-md transition text-sm cursor-pointer">
-                BROADCAST MESSAGE ??
+                BROADCAST MESSAGE 🚀
             </button>
         </div>
-
         <div id="statusMessage" class="text-xs font-medium hidden"></div>
-
         <div>
-            <a href="index.html" class="text-xs text-slate-500 hover:text-[#a35d48] underline">? Back to App</a>
+            <a href="index.html" class="text-xs text-slate-500 hover:text-[#a35d48] underline">← Back to App</a>
         </div>
     </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDxFse5ziXWYyzOimzdWjqNNDgsvzD-rvo",
@@ -49,10 +41,7 @@
             messagingSenderId: "583723658573",
             appId: "1:583723658573:web:e9e074ffacbf29f1ad5b04"
         };
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
         async function sendBroadcast() {
@@ -61,13 +50,13 @@
             const statusEl = document.getElementById("statusMessage");
 
             if (!title || !message) {
-                statusEl.textContent = "Please fill out both the title and message body.";
+                statusEl.textContent = "Please fill out both fields.";
                 statusEl.className = "text-xs font-medium text-red-600";
                 statusEl.classList.remove("hidden");
                 return;
             }
 
-            statusEl.textContent = "Publishing broadcast to database...";
+            statusEl.textContent = "Publishing broadcast...";
             statusEl.className = "text-xs font-medium text-slate-600";
             statusEl.classList.remove("hidden");
 
@@ -77,14 +66,13 @@
                     message: message,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
-                statusEl.textContent = "Success! Broadcast sent to all active users ??";
+                statusEl.textContent = "Success! Broadcast sent to all active users.";
                 statusEl.className = "text-xs font-bold text-green-700";
                 document.getElementById("notifTitle").value = "";
                 document.getElementById("notifBody").value = "";
             } catch (err) {
-                console.error("Broadcast error:", err);
-                statusEl.textContent = "Error publishing broadcast. Check connection.";
+                console.error(err);
+                statusEl.textContent = "Error sending broadcast.";
                 statusEl.className = "text-xs font-bold text-red-600";
             }
         }
