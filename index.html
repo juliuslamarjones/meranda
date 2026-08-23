@@ -48,7 +48,7 @@
                     <h3 class="text-xs font-bold text-[#2c221b] uppercase tracking-wider">Never Miss an Update!</h3>
                 </div>
                 <button id="enablePushBtn" class="push-btn" onclick="logClick()">
-                    Enable Alerts 🔔
+                    Enable Push Notifications
                 </button>
                 <div class="text-center pt-2">
                     <a href="admin.html" class="text-[10px] text-slate-400 hover:text-[#a35d48] underline">Admin Portal</a>
@@ -81,7 +81,7 @@
 
         async function logClick() {
             const btn = document.getElementById("enablePushBtn");
-            btn.textContent = "Alerts Active ✓";
+            btn.textContent = "Alerts Active";
             btn.className = "push-btn active-btn";
             try {
                 await db.collection("meranda_taps").add({

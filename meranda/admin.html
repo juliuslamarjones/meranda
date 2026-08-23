@@ -11,7 +11,7 @@
 <body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] p-6 text-center space-y-6">
         <div class="space-y-1">
-            <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center 🚀</h2>
+            <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center</h2>
             <p class="text-xs text-slate-600">Send instant announcements to app users.</p>
         </div>
         <div class="space-y-4 text-left">
@@ -24,12 +24,12 @@
                 <textarea id="notifBody" rows="3" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Unexpected cancellation at 2 PM..."></textarea>
             </div>
             <button onclick="sendBroadcast()" class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold py-4 px-6 rounded-xl shadow-md transition text-sm cursor-pointer">
-                BROADCAST MESSAGE 🚀
+                BROADCAST MESSAGE
             </button>
         </div>
         <div id="statusMessage" class="text-xs font-medium hidden"></div>
         <div>
-            <a href="index.html" class="text-xs text-slate-500 hover:text-[#a35d48] underline">← Back to App</a>
+            <a href="index.html" class="text-xs text-slate-500 hover:text-[#a35d48] underline">&larr; Back to App</a>
         </div>
     </div>
     <script>
@@ -61,11 +61,21 @@
             statusEl.classList.remove("hidden");
 
             try {
+                // Clear out old broadcasts first so only the newest one shows
+                const snapshot = await db.collection("broadcasts").get();
+                const batch = db.batch();
+                snapshot.docs.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+
+                // Add new broadcast
                 await db.collection("broadcasts").add({
                     title: title,
                     message: message,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
                 statusEl.textContent = "Success! Broadcast sent to all active users.";
                 statusEl.className = "text-xs font-bold text-green-700";
                 document.getElementById("notifTitle").value = "";
