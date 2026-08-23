@@ -55,7 +55,11 @@
             statusEl.classList.remove("hidden");
 
             try {
-                const response = await fetch("https://api.onesignal.com/notifications", {
+                // Using corsproxy to route properly from browser frontend to OneSignal API without CORS blocks
+                const targetUrl = "https://api.onesignal.com/notifications";
+                const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+
+                const response = await fetch(proxyUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
@@ -78,7 +82,7 @@
                     document.getElementById("notifBody").value = "";
                 } else {
                     console.error("OneSignal Error:", data);
-                    statusEl.textContent = "Error: " + (data.errors ? data.errors.join(", ") : "Unauthorized or invalid configuration.");
+                    statusEl.textContent = "Error: " + (data.errors ? (typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors)) : "Unauthorized or invalid configuration.");
                     statusEl.className = "text-xs font-medium text-red-600";
                 }
             } catch (err) {
