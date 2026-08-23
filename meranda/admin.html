@@ -69,13 +69,13 @@
           try {
               // Using a reliable CORS proxy wrapper for client-side API requests
               const proxyUrl = "https://corsproxy.io/?";
-              const targetUrl = "https://api.onesignal.com/notifications";
+              const targetUrl = "https://onesignal.com/api/v1/notifications";
 
               const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
                   method: "POST",
                   headers: {
                       "Content-Type": "application/json; charset=utf-8",
-                      "Authorization": "Basic " + apiKey
+                      "Authorization": "Basic os_v2_app_ed76yxkh5rd2fecpnljtiukpiqgfhfuv3zdurvukmb6zgbf67j2eeltgnolfpurigwrcazkuh4msnfos47xvytfsi563c6jgmdnssjy" + apiKey
                   },
                   body: JSON.stringify({
                       app_id: APP_ID,
