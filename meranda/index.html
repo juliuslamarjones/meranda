@@ -117,13 +117,22 @@
         }
         const db = firebase.firestore();
 
-        db.collection("meranda_taps").add({
-            action: "page_view_firebase",
-            userAgent: navigator.userAgent,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(err => console.error(err));
+        // Fetch the latest broadcast immediately upon loading the app
+        db.collection("broadcasts")
+          .orderBy("timestamp", "desc")
+          .limit(1)
+          .get()
+          .then((querySnapshot) => {
+              querySnapshot.forEach((doc) => {
+                  const data = doc.data();
+                  if (data && data.title) {
+                      showBroadcastBanner(data.title, data.message);
+                  }
+              });
+          })
+          .catch((err) => console.error("Error fetching broadcast:", err));
 
-        // Listen for real-time broadcasts from admin
+        // Listen for new broadcasts in real-time while the page is open
         db.collection("broadcasts")
           .orderBy("timestamp", "desc")
           .limit(1)
@@ -157,7 +166,7 @@
                     userAgent: navigator.userAgent,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log("Successfully logged push subscription click!");
+                console.log("Successfully logged click!");
             } catch (e) {
                 console.error("Firestore error:", e);
             }
