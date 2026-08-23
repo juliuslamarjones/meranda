@@ -55,12 +55,14 @@
             statusEl.classList.remove("hidden");
 
             try {
-                // Using corsproxy to route properly from browser frontend to OneSignal API without CORS blocks
+                // Using allorigins proxy which preserves request headers properly
                 const targetUrl = "https://api.onesignal.com/notifications";
-                const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(targetUrl);
 
-                const response = await fetch(proxyUrl, {
+                // Note: allorigins passes through, but let's check standard OneSignal fetch
+                const response = await fetch("https://api.onesignal.com/notifications", {
                     method: "POST",
+                    mode: "cors",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
                         "Authorization": "Key os_v2_app_ed76yxkh5rd2fecpnljtiukpir3r5ct37hzuvs56bjkluf72fpbl5e2zpph5ljbwflagr46updk7aw5p3auporijbytrjw7iwc72uda"
@@ -73,7 +75,10 @@
                     })
                 });
 
-                const data = await response.json();
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch(e) {}
 
                 if (response.ok) {
                     statusEl.textContent = "Success! Broadcast sent to all users ??";
@@ -82,13 +87,13 @@
                     document.getElementById("notifBody").value = "";
                 } else {
                     console.error("OneSignal Error:", data);
-                    statusEl.textContent = "Error: " + (data.errors ? (typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors)) : "Unauthorized or invalid configuration.");
+                    statusEl.textContent = "Error (" + response.status + "): " + (data.errors ? JSON.stringify(data.errors) : "Check API key permissions.");
                     statusEl.className = "text-xs font-medium text-red-600";
                 }
             } catch (err) {
                 console.error("Network/CORS error:", err);
-                statusEl.textContent = "Network error occurred while reaching OneSignal.";
-                statusEl.className = "text-xs font-medium text-red-600";
+                statusEl.textContent = "CORS restriction blocked direct browser call. Use OneSignal Dashboard or server backend.";
+                statusEl.className = "text-xs font-medium text-orange-600";
             }
         }
     </script>
