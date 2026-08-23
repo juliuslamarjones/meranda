@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meranda's Grooming - Admin Center</title>
+    <title>Meranda's Grooming - Admin Broadcast Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] p-6 text-center space-y-6">
-        <div class="space-y-1">
-            <h2 class="text-xl font-bold text-[#2c221b]">Admin Broadcast Center</h2>
-            <p class="text-xs text-slate-600">Send announcements with instant popup.</p>
+<body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center p-4 min-h-screen">
+    <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] overflow-hidden my-auto p-6 space-y-6">
+        <div class="text-center space-y-1">
+            <h2 class="text-2xl font-bold text-[#2c221b]">Admin Broadcast Center</h2>
+            <p class="text-xs text-slate-600 font-medium">Send announcements with instant popup.</p>
         </div>
-        <div class="space-y-4 text-left">
+
+        <div class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-[#2c221b] mb-1">Notification Title</label>
-                <input type="text" id="notifTitle" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Special Opening Tomorrow!">
+                <label class="block text-xs font-bold uppercase tracking-wider text-[#3e3226] mb-1">Notification Title</label>
+                <input type="text" id="notifTitle" placeholder="e.g. Special Opening Tomorrow!" class="w-full p-3 rounded-xl border border-[#e6d5c3] bg-white text-sm focus:outline-none focus:border-[#a35d48]">
             </div>
             <div>
-                <label class="block text-xs font-bold text-[#2c221b] mb-1">Message Body</label>
-                <textarea id="notifBody" rows="3" class="w-full p-3 text-xs rounded-xl border border-[#e6d5c3] bg-white focus:outline-none focus:ring-2 focus:ring-[#a35d48]" placeholder="e.g. Unexpected cancellation at 2 PM..."></textarea>
+                <label class="block text-xs font-bold uppercase tracking-wider text-[#3e3226] mb-1">Message Body</label>
+                <textarea id="notifMessage" rows="3" placeholder="e.g. Unexpected cancellation at 2 PM..." class="w-full p-3 rounded-xl border border-[#e6d5c3] bg-white text-sm focus:outline-none focus:border-[#a35d48]"></textarea>
             </div>
-            <button onclick="sendBroadcast()" class="w-full bg-[#a35d48] hover:bg-[#8f4e3c] text-white font-bold py-4 px-6 rounded-xl shadow-md transition text-sm cursor-pointer">
+            
+            <button onclick="sendBroadcast()" class="w-full bg-[#a35d48] hover:bg-[#8e4f3c] text-white font-bold text-sm py-4 rounded-xl shadow-md cursor-pointer transition">
                 SEND INSTANT POPUP NOW
             </button>
+            
+            <div id="statusMsg" class="text-center text-xs font-bold h-4"></div>
         </div>
-        <div id="statusMessage" class="text-xs font-medium hidden"></div>
-        <div>
-            <a href="index.html" class="text-xs text-slate-500 hover:text-[#a35d48] underline">&larr; Back to App</a>
+
+        <div class="text-center pt-2">
+            <a href="index.html" class="text-xs text-slate-400 hover:text-[#a35d48] underline">← Back to App</a>
         </div>
     </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDxFse5ziXWYyzOimzdWjqNNDgsvzD-rvo",
@@ -44,52 +49,41 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
-        if (window.Notification && Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
         async function sendBroadcast() {
             const title = document.getElementById("notifTitle").value.trim();
-            const message = document.getElementById("notifBody").value.trim();
-            const statusEl = document.getElementById("statusMessage");
+            const message = document.getElementById("notifMessage").value.trim();
+            const status = document.getElementById("statusMsg");
 
             if (!title || !message) {
-                statusEl.textContent = "Please fill out both fields.";
-                statusEl.className = "text-xs font-medium text-red-600";
-                statusEl.classList.remove("hidden");
+                status.style.color = "red";
+                status.textContent = "Please fill in both title and message.";
                 return;
             }
 
-            statusEl.textContent = "Triggering popup...";
-            statusEl.className = "text-xs font-medium text-slate-600";
-            statusEl.classList.remove("hidden");
+            status.style.color = "#64748b";
+            status.textContent = "Sending broadcast...";
 
             try {
-                const snapshot = await db.collection("broadcasts").get();
-                const batch = db.batch();
-                snapshot.docs.forEach((doc) => batch.delete(doc.ref));
-                await batch.commit();
-
+                // Save to Firestore broadcasts collection
                 await db.collection("broadcasts").add({
                     title: title,
                     message: message,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
+                // Also trigger local notification on the admin device if permitted
                 if (window.Notification && Notification.permission === "granted") {
                     new Notification(title, { body: message });
-                } else {
-                    alert(title + ": " + message);
                 }
 
-                statusEl.textContent = "Success! Popup triggered & broadcast sent.";
-                statusEl.className = "text-xs font-bold text-green-700";
+                status.style.color = "green";
+                status.textContent = "Success! Popup triggered & broadcast sent.";
                 document.getElementById("notifTitle").value = "";
-                document.getElementById("notifBody").value = "";
-            } catch (err) {
-                console.error(err);
-                statusEl.textContent = "Error sending.";
-                statusEl.className = "text-xs font-bold text-red-600";
+                document.getElementById("notifMessage").value = "";
+            } catch (error) {
+                console.error("Broadcast error:", error);
+                status.style.color = "red";
+                status.textContent = "Error: " + error.message;
             }
         }
     </script>
