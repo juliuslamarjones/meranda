@@ -5,19 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meranda's Grooming - Admin Broadcast Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      window.OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "20ffec5d-47ec-47af-904f-6ad334514f44",
-          safari_web_id: "web.onesignal.auto.00000000-0000-0000-0000-000000000000",
-          notifyButton: { enable: true },
-        });
-      });
-    </script>
 </head>
 <body class="bg-[#f7f4ee] text-[#3e3226] flex items-center justify-center min-h-screen p-4">
+    <!-- In-app Toast Notification Pop-up -->
+    <div id="toastPopup" class="fixed top-5 right-5 transform translate-y-[-150%] transition-all duration-300 z-50 bg-[#fef9f2] border-2 border-[#a35d48] shadow-2xl rounded-2xl p-4 max-w-sm w-full flex items-start space-x-3">
+        <div class="bg-[#a35d48] text-white p-2 rounded-xl font-bold text-xs uppercase tracking-wider">Alert</div>
+        <div class="flex-1">
+            <h4 id="toastTitle" class="font-bold text-sm text-[#2c221b]"></h4>
+            <p id="toastMessage" class="text-xs text-slate-600 mt-0.5"></p>
+        </div>
+        <button onclick="closeToast()" class="text-slate-400 hover:text-slate-600 font-bold text-sm">&times;</button>
+    </div>
+
     <div class="bg-[#fef9f2] border-[3px] border-[#a35d48] rounded-3xl shadow-xl max-w-lg w-full p-8 space-y-6">
         <div class="text-center space-y-2">
             <h1 class="text-3xl font-bold text-[#2c221b]">Admin Broadcast Center</h1>
@@ -62,22 +61,54 @@
             statusEl.textContent = "Broadcasting notification...";
             statusEl.className = "text-center text-xs font-bold text-amber-600 block";
 
-            // Trigger browser native notification locally so you see the popup instantly
-            if (Notification.permission === "granted") {
-                new Notification(title, { body: message, icon: "favicon.ico" });
-            } else if (Notification.permission !== "denied") {
+            // Request browser notification permission explicitly
+            if (Notification.permission !== "granted") {
                 const permission = await Notification.requestPermission();
-                if (permission === "granted") {
-                    new Notification(title, { body: message });
+                if (permission !== "granted") {
+                    statusEl.textContent = "Permission denied. Enable notifications in your browser settings.";
+                    statusEl.className = "text-center text-xs font-bold text-red-600 block";
+                    return;
                 }
             }
+
+            // Trigger system-level native notification popup
+            try {
+                new Notification(title, {
+                    body: message,
+                    icon: "https://juliuslamarjones.github.io/meranda/favicon.ico"
+                });
+            } catch (e) {
+                console.error("System notification error:", e);
+            }
+
+            // Trigger guaranteed in-app visual toast pop-up
+            showToast(title, message);
 
             setTimeout(() => {
                 statusEl.textContent = "Success! Broadcast sent to all subscribers.";
                 statusEl.className = "text-center text-xs font-bold text-emerald-600 block";
                 document.getElementById('notifTitle').value = '';
                 document.getElementById('notifBody').value = '';
-            }, 600);
+            }, 500);
+        }
+
+        function showToast(title, message) {
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            const toast = document.getElementById('toastPopup');
+            toast.classList.remove('translate-y-[-150%]');
+            toast.classList.add('translate-y-0');
+
+            // Auto-hide after 6 seconds
+            setTimeout(() => {
+                closeToast();
+            }, 6000);
+        }
+
+        function closeToast() {
+            const toast = document.getElementById('toastPopup');
+            toast.classList.remove('translate-y-0');
+            toast.classList.add('translate-y-[-150%]');
         }
     </script>
 </body>
