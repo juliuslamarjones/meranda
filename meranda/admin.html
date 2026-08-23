@@ -53,14 +53,17 @@
 
             const part1 = "os_v2_app_ed7";
             const part2 = "6yxkh5rd2fecpnljtiukpiqxwcjmgazhug5moluw36velrekcfanv33vtiuydtf3nlyjsmgchaxmxd4yv6h23y2x3jvqdm7oujey";
-            const apiKey = "Bearer " + part1 + part2;
+            const rawKey = part1 + part2;
+            
+            // Encode key properly for OneSignal REST API authorization
+            const encodedAuth = "Basic " + btoa(":" + rawKey);
 
             try {
                 const response = await fetch("https://corsproxy.io/?https://onesignal.com/api/v1/notifications", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
-                        "Authorization": apiKey
+                        "Authorization": encodedAuth
                     },
                     body: JSON.stringify({
                         app_id: "20ffec5d-47ec-47af-904f-6ad334514f44",
