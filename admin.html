@@ -55,14 +55,14 @@
             statusEl.classList.remove("hidden");
 
             try {
-                const targetUrl = "https://onesignal.com/api/v1/notifications";
+                const targetUrl = "https://api.onesignal.com/notifications";
                 const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
 
                 const response = await fetch(proxyUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8",
-                        "Authorization": "Basic os_v2_app_ed76yxkh5rd2fecpnljtiukpirxzvhjqqefulivg3t5ihhftjgtrsqioeohy6oeadn5zalsvneuysgs7gjsrmna2qykhdrlup7dfv4a"
+                        "Authorization": "Key os_v2_app_ed76yxkh5rd2fecpnljtiukpirxzvhjqqefulivg3t5ihhftjgtrsqioeohy6oeadn5zalsvneuysgs7gjsrmna2qykhdrlup7dfv4a"
                     },
                     body: JSON.stringify({
                         app_id: "20ffec5d-47ec-47a2-904f-6ad334514f44",
