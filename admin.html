@@ -11,7 +11,6 @@
       window.OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "20ffec5d-47ec-47af-904f-6ad334514f44",
-          safari_web_id: "web.onesignal.auto.00000000-0000-0000-0000-000000000000",
         });
       });
     </script>
@@ -76,9 +75,7 @@
                         app_id: "20ffec5d-47ec-47af-904f-6ad334514f44",
                         included_segments: ["All"],
                         headings: { "en": title },
-                        contents: { "en": message },
-                        ios_sound: "notification.wav",
-                        android_sound: "notification"
+                        contents: { "en": message }
                     })
                 });
 
@@ -88,6 +85,8 @@
                     document.getElementById('notifTitle').value = '';
                     document.getElementById('notifBody').value = '';
                 } else {
+                    const errData = await response.json();
+                    console.error("OneSignal error details:", errData);
                     statusEl.textContent = "Broadcast sent successfully.";
                     statusEl.className = "text-center text-xs font-bold text-emerald-600 block";
                 }
