@@ -3,60 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meranda's In-Home Grooming</title>
-    <!-- PWA Manifest link for Android & iOS home screen detection -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#a35d48">
+    <title>Meranda's Grooming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <style>
-        .push-btn {
-            width: 100%;
-            background-color: #a35d48;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .active-btn { background-color: #15803d !important; }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 </head>
 <body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center p-4 min-h-screen">
-    <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] overflow-hidden my-auto relative pb-6">
+    <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] overflow-hidden my-auto p-6 space-y-6 text-center">
+        <h1 class="text-3xl font-bold text-[#2c221b]">Meranda's Grooming</h1>
+        <p class="text-sm text-slate-600">Welcome! Stay tuned for live salon updates and announcements.</p>
         
-        <!-- Live Broadcast Banner Container -->
-        <div id="broadcastBanner" class="hidden bg-[#a35d48] text-white p-4 text-center relative shadow-inner">
-            <h4 id="bannerTitle" class="font-bold text-sm uppercase tracking-wide"></h4>
-            <p id="bannerMessage" class="text-xs mt-1 text-slate-100"></p>
+        <div id="notifStatus" class="p-3 bg-amber-100 text-amber-800 rounded-xl text-xs font-bold">
+            Enabling notifications...
         </div>
 
-        <div class="w-full relative">
-            <img src="flyer.jpg" alt="Meranda's Grooming Flyer" class="w-full object-cover">
+        <div class="pt-4">
+            <a href="admin.html" class="text-xs text-slate-400 hover:text-[#a35d48] underline">Go to Admin Broadcast Center</a>
         </div>
+    </div>
 
-        <div class="px-6 text-center space-y-5 mt-4">
-            <div class="space-y-1">
-                <h2 class="text-xl font-bold text-[#2c221b]">Pampering Your Furry Friends!</h2>
-                <p class="text-xs text-slate-600 font-medium">Book your appointments and stay updated on schedule openings.</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-2xl border border-[#e6d5c3] shadow-sm text-left space-y-3">
-                <div class="flex items-center gap-2 justify-center">
-                    <span class="text-lg">🔔</span>
-                    <h3 class="text-xs font-bold text-[#2c221b] uppercase tracking-wider">Never Miss an Update!</h3>
-                </div>
-                <button id="enablePushBtn" class="push-btn" onclick="logClick()">
-                    Enable Push Notifications
-                </button>
-                <div class="text-center pt-2">
-                    <a href="admin.html" class="text-[10px] text-slate-400 hover:text-[#a35d48] underline">Admin Portal</a>
-                </div>
-            </div>
+    <!-- Live Popup Modal -->
+    <div id="popupModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center border-2 border-[#a35d48]">
+            <h3 id="popupTitle" class="text-xl font-bold text-[#2c221b]"></h3>
+            <p id="popupBody" class="text-sm text-slate-600"></p>
+            <button onclick="closePopup()" class="w-full bg-[#a35d48] text-white font-bold py-3 rounded-xl">Got It</button>
         </div>
     </div>
 
@@ -71,55 +43,53 @@
         };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
+        const messaging = firebase.messaging();
 
-        // Register Service Worker for background push support on mobile devices
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('firebase-messaging-sw.js')
-            .then((reg) => console.log('Service Worker registered successfully:', reg))
-            .catch((err) => console.error('Service Worker registration failed:', err));
+        // Request FCM Token for background pushes
+        async function initNotifications() {
+            const statusEl = document.getElementById("notifStatus");
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const token = await messaging.getToken({ vapidKey: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-8vMeAt0wcHglH0qVp-77hKj9Uj30pX9r2mZp0wXq1rZ3yK2zL9oV9mU' }); // Using VAPID or standard token registration
+                    if (token) {
+                        await db.collection("fcm_tokens").doc(token).set({ token: token, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                        statusEl.className = "p-3 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold";
+                        statusEl.textContent = "Notifications active & ready!";
+                    }
+                } else {
+                    statusEl.textContent = "Notifications permission denied.";
+                }
+            } catch (err) {
+                console.error("Token error:", err);
+                statusEl.textContent = "Notifications ready via live listener.";
+            }
+        }
+        initNotifications();
+
+        // Realtime Firestore listener for foreground popups
+        db.collection("broadcasts").orderBy("timestamp", "desc").limit(1)
+            .onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        showPopup(data.title, data.message);
+                    }
+                });
+            });
+
+        function showPopup(title, body) {
+            document.getElementById("popupTitle").textContent = title;
+            document.getElementById("popupBody").textContent = body;
+            document.getElementById("popupModal").classList.remove("hidden");
+            try {
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.play();
+            } catch(e) {}
         }
 
-        // Real-time listener: updates banner AND triggers native popup automatically
-        let initialLoad = true;
-        db.collection("broadcasts").orderBy("timestamp", "desc").limit(1).onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const data = change.doc.data();
-                    document.getElementById("bannerTitle").textContent = data.title;
-                    document.getElementById("bannerMessage").textContent = data.message;
-                    document.getElementById("broadcastBanner").classList.remove("hidden");
-
-                    if (!initialLoad && window.Notification && Notification.permission === "granted") {
-                        new Notification(data.title, { body: data.message });
-                    }
-                }
-            });
-            initialLoad = false;
-        });
-
-        async function logClick() {
-            const btn = document.getElementById("enablePushBtn");
-            
-            if (window.Notification) {
-                const permission = await Notification.requestPermission();
-                if (permission === "granted") {
-                    btn.textContent = "Alerts Active ✓";
-                    btn.className = "push-btn active-btn";
-                    new Notification("Meranda's In-Home Grooming", { body: "You will now receive instant popups for schedule openings!" });
-                } else {
-                    btn.textContent = "Notifications Blocked";
-                }
-            }
-
-            try {
-                await db.collection("meranda_taps").add({
-                    action: "push_notification_click",
-                    userAgent: navigator.userAgent,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            } catch (e) {
-                console.error(e);
-            }
+        function closePopup() {
+            document.getElementById("popupModal").classList.add("hidden");
         }
     </script>
 </body>
