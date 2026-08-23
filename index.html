@@ -3,28 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meranda's Grooming</title>
+    <title>Meranda's In-Home Grooming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      window.OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "20ffec5d-47ec-47af-904f-6ad334514f44",
-          notifyButton: {
-            enable: true,
-          },
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "20ffec5d-47ec-47af-904f-6ad334514f44",
+                safari_web_id: "web.onesignal.auto.00000000-0000-0000-0000-000000000000",
+                notifyButton: { enable: true },
+            });
         });
-      });
     </script>
 </head>
-<body class="bg-[#f7f4ee] text-[#3e3226] flex flex-col items-center p-4 min-h-screen">
-    <div class="w-full max-w-[480px] bg-[#fef9f2] rounded-3xl shadow-lg border-[3px] border-[#a35d48] overflow-hidden my-auto p-6 space-y-6 text-center">
-        <h1 class="text-3xl font-bold text-[#2c221b]">Meranda's Grooming</h1>
-        <p class="text-sm text-slate-600">Welcome! Live salon updates and announcements.</p>
-        
-        <div class="pt-4">
-            <a href="admin.html" class="text-xs text-slate-400 hover:text-[#a35d48] underline">Go to Admin Broadcast Center</a>
+<body class="bg-[#f7f4ee] text-[#3e3226] flex items-center justify-center min-h-screen p-4">
+    <div class="bg-[#fef9f2] border-[3px] border-[#a35d48] rounded-3xl shadow-xl max-w-md w-full p-6 text-center space-y-6">
+        <div>
+            <h2 class="text-xs font-bold tracking-widest text-[#a35d48] uppercase">In-Home Grooming</h2>
+            <h1 class="text-4xl font-extrabold text-[#2c221b] mt-1 font-serif italic">grooming</h1>
+            <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">Stress-less grooming in a calm, comfortable home setting</p>
+            <p class="text-xs font-bold text-emerald-700 mt-1">9 Years Grooming Experience</p>
+        </div>
+
+        <div class="relative rounded-2xl overflow-hidden border-2 border-[#a35d48]/30 shadow-md bg-white p-2">
+            <p class="text-xs font-bold text-[#a35d48] mb-2 uppercase tracking-wide">Because they deserve to look and feel their best!</p>
+            <div class="grid grid-cols-4 gap-1">
+                <div class="h-20 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center text-[10px] text-slate-500 font-bold">Dog 1</div>
+                <div class="h-20 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center text-[10px] text-slate-500 font-bold">Dog 2</div>
+                <div class="h-20 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center text-[10px] text-slate-500 font-bold">Dog 3</div>
+                <div class="h-20 bg-slate-200 rounded-lg overflow-hidden flex items-center justify-center text-[10px] text-slate-500 font-bold">Dog 4</div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-2">Hockley, TX</p>
+        </div>
+
+        <div class="space-y-2">
+            <h3 class="font-bold text-lg text-[#2c221b]">Pampering Your Furry Friends!</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">Book your appointments and stay updated on exclusive grooming tips, special availability, and updates.</p>
+        </div>
+
+        <div class="bg-white border-2 border-[#a35d48]/20 rounded-2xl p-4 space-y-3 shadow-sm">
+            <h4 class="font-bold text-xs text-[#2c221b] uppercase tracking-wide">Never Miss An Update!</h4>
+            <p class="text-[11px] text-slate-500">Tap the button below to turn on instant push notifications for schedule openings and reminders.</p>
+            <button onclick="OneSignal.Slidedown.promptPush();" class="w-full bg-[#a35d48] hover:bg-[#8e4f3d] text-white font-bold py-3 rounded-xl shadow-md transition-all text-sm">
+                Enable Push Notifications 🔔
+            </button>
+        </div>
+
+        <div class="text-center pt-1">
+            <a href="admin.html" class="text-[11px] text-slate-400 hover:text-[#a35d48] underline">Admin Portal</a>
         </div>
     </div>
 </body>
