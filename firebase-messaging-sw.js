@@ -17,7 +17,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://juliuslamarjones.github.io/meranda/'
+        icon: 'https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=https://juliuslamarjones.github.io/meranda/'
     };
+
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
