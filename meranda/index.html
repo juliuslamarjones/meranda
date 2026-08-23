@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meranda's In-Home Grooming</title>
+    <!-- PWA Manifest link for Android & iOS home screen detection -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#a35d48">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -69,7 +72,14 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.firestore();
 
-        // Real-time listener: updates banner AND triggers native popup automatically for customers
+        // Register Service Worker for background push support on mobile devices
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('firebase-messaging-sw.js')
+            .then((reg) => console.log('Service Worker registered successfully:', reg))
+            .catch((err) => console.error('Service Worker registration failed:', err));
+        }
+
+        // Real-time listener: updates banner AND triggers native popup automatically
         let initialLoad = true;
         db.collection("broadcasts").orderBy("timestamp", "desc").limit(1).onSnapshot((snapshot) => {
             snapshot.docChanges().forEach((change) => {
